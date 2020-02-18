@@ -51,7 +51,52 @@ export default {
     }
   ),
 
-  // Resolver to comment on a post
+  // Edit a post
+  edit_post: combineResolvers(isEmployee, async (_, args, { Id }) => {
+    try {
+      const updatedPost = await Employee.findByIdAndUpdate(Id, args, {
+        new: true
+      });
+
+      // Response
+      return updatedPost;
+    } catch (err) {
+      throw err;
+    }
+  }),
+  // Resolver for user to delete his/her posts
+  delete_post: combineResolvers(isEmployee, async (_, { postId }, { Id }) => {
+    try {
+      // find post
+      const findPost = await Post.findOne({
+        _id: postId,
+        creator: Id
+      });
+
+      if (!findPost) {
+        throw new ApolloError("Post does not exist");
+      }
+
+      // Delete post
+      const deletedPost = await Post.findByIdAndRemove(postId);
+
+      await Employee.findByIdAndUpdate(
+        Id,
+        { $pull: { posts: deletedPost._id } },
+        { new: true }
+      );
+
+      // Response
+      return {
+        message: "Post was deleted successfully",
+        value: true
+      };
+    } catch (err) {
+      throw err;
+    }
+  }),
+
+  // Comment on a post
   post_comment: combineResolvers(
     isEmployee,
     async (_, { postId, comment }, { Id }) => {
@@ -63,7 +108,7 @@ export default {
           throw new ApolloError("Post not found");
         }
 
-        // create and save the comment
+        // Create and save the comment
         const newComment = new Comment({
           comment,
           creator: Id
@@ -75,15 +120,6 @@ export default {
         await Post.findByIdAndUpdate(
           postId,
           { $push: { comments: savedComment } },
-          { new: true }
-        );
-
-        // Update the user account with the comment
-        await Employee.findByIdAndUpdate(
-          Id,
-          {
-            $push: { comments: savedComment }
-          },
           { new: true }
         );
 

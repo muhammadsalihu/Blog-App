@@ -18,14 +18,17 @@ export default gql`
 
     create_employee(employee_id: String!, password: String!): Status
 
+    update_employee_profile(full_name: String, email: String): Status
+
     employee_change_password(
-      employee_id: ID!
       old_password: String!
       new_password: String!
       confirm_password: String!
     ): Status
 
     create_post(title: String!, content: String!, category: String!): Post!
+
+    delete_post(postId: ID!): Status
 
     post_comment(postId: ID!, comment: String!): Comment!
   }
@@ -54,7 +57,6 @@ export default gql`
     employee_id: String!
     is_employee: Boolean
     posts: [Post!]
-    comments: [Comment!]
     createdAt: Date
   }
 

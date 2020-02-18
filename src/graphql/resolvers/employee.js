@@ -38,28 +38,39 @@ export default {
     }
   },
 
+  // Update Employee profile
+  update_employee_profile: combineResolvers(
+    isEmployee,
+    async (_, args, { Id }) => {
+      try {
+        const employeeUpdate = await Employee.findByIdAndUpdate(Id, args, {
+          new: true
+        });
+
+        // Response
+        return {
+          message: "Account Updated Successfully",
+          value: true,
+          user_1: employeeUpdate
+        };
+      } catch (err) {
+        throw err;
+      }
+    }
+  ),
+
   // Resolver for employee to change password after admin has created his account
   employee_change_password: combineResolvers(
     isEmployee,
-    async (
-      _,
-      { employee_id, old_password, new_password, confirm_password },
-      { Id }
-    ) => {
+    async (_, { old_password, new_password, confirm_password }, { Id }) => {
       try {
-        // verify user
-        const employFind = await Employee.findById(employee_id);
-        console.log(employFind);
-        console.log(Id);
-
-        if (!employFind) {
-          throw new ApolloError("User does not exist");
-        }
+        // Find Logged in Employee by it's Id
+        const employFind = await Employee.findById(Id);
 
         // Check if old password is correct
-        if (employFind.password !== old_password) {
+        const isMatch = await bcrypt.compare(old_password, employFind.password);
+        if (!isMatch)
           throw new UserInputError("Make sure your old password is correct");
-        }
 
         // Check if the new passwords match
         if (new_password !== confirm_password) {

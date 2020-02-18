@@ -43,7 +43,6 @@ const isAuth = (req, res, next) => {
   req.userId = decodedToken.userId;
   // Add user type to the token field
   req.isAdmin = decodedToken.isAdmin;
-
   // Add user type to the token field
   req.isEmployee = decodedToken.isEmployee;
 
