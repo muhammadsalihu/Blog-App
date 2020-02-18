@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { combineResolvers } from "graphql-resolvers";
 
 import Employee from "../../models/user-type/employee";
-import { isEmployee } from "../../services/authorization";
+import { isEmployee, isAdmin } from "../../services/authorization";
 
 dotenv.config();
 

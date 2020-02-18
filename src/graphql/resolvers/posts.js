@@ -64,7 +64,8 @@ export default {
       throw err;
     }
   }),
-  // Resolver for user to delete his/her posts
+
+  // Delete a post
   delete_post: combineResolvers(isEmployee, async (_, { postId }, { Id }) => {
     try {
       // find post

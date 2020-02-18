@@ -86,7 +86,6 @@ export default {
       try {
         // Check if employees is already created
         const employ = await Employee.findOne({ employee_id });
-        console.log(employ);
 
         if (employ) {
           throw new ApolloError("Employee with Id already exist");
@@ -108,8 +107,6 @@ export default {
           password: hashedPassword
         });
 
-        console.log(newEmploy);
-
         // Save employee
         const savedEmploy = await newEmploy.save();
 
@@ -127,6 +124,61 @@ export default {
           message: "Employee Created Successfully",
           value: true,
           user_1: savedEmploy
+        };
+      } catch (err) {
+        throw err;
+      }
+    }
+  ),
+
+  // ????????????????????
+  // Fix this Below.... View Employees not working
+  // ????????????????????
+
+  // Resolver for admin to view all employees
+  view_employees: combineResolvers(isAdmin, async () => {
+    try {
+      const employees = await Admin.find(employees);
+
+      if (!employees) {
+        throw new ApolloError("No Employee found in the database");
+      } else {
+        return {
+          employees
+        };
+      }
+    } catch (err) {
+      throw err;
+    }
+  }),
+
+  // Delete an Employee
+  delete_employee: combineResolvers(
+    isAdmin,
+    async (_, { employeeId }, { Id }) => {
+      try {
+        // find post
+        const findEmployee = await Employee.findOne({
+          _id: employeeId
+        });
+
+        if (!findEmployee) {
+          throw new ApolloError("Employee does not exist");
+        }
+
+        // Delete post
+        const deletedEmployee = await Employee.findByIdAndRemove(employeeId);
+
+        await Employee.findByIdAndUpdate(
+          Id,
+          { $pull: { employees: deletedEmployee._id } },
+          { new: true }
+        );
+
+        // Response
+        return {
+          message: "Employee was deleted successfully",
+          value: true
         };
       } catch (err) {
         throw err;

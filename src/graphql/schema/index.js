@@ -11,6 +11,7 @@ export default gql`
   type Query {
     admin_login(email: String!, password: String!): Status
     employee_login(employee_id: String!, password: String!): Status
+    view_employees: Employee
   }
 
   type Mutation {
@@ -19,6 +20,8 @@ export default gql`
     create_employee(employee_id: String!, password: String!): Status
 
     update_employee_profile(full_name: String, email: String): Status
+
+    delete_employee(employeeId: String!): Status
 
     employee_change_password(
       old_password: String!
