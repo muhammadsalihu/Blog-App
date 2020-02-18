@@ -1,0 +1,35 @@
+{
+  "name": "motionwares-blog-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf build && mkdir build",
+    "start": "babel-watch ./src/server.js",
+    "build": "npm run clean && npm run build-server",
+    "build-server": "babel -d ./build ./src -s"
+  },
+  "keywords": [],
+  "author": "Muhammad Salihu",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.4",
+    "@babel/node": "^7.8.4",
+    "@babel/plugin-transform-runtime": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/runtime": "^7.8.4",
+    "apollo-server": "^2.10.0",
+    "apollo-server-express": "^2.10.0",
+    "babel-watch": "^7.0.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "graphql": "^14.6.0",
+    "graphql-iso-date": "^3.6.1",
+    "graphql-resolvers": "^0.4.2",
+    "graphql-subscriptions": "^1.1.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.8.12"
+  }
+}
