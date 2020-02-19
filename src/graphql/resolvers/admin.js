@@ -131,22 +131,14 @@ export default {
     }
   ),
 
-  // ????????????????????
-  // Fix this Below.... View Employees not working
-  // ????????????????????
-
   // Resolver for admin to view all employees
   view_employees: combineResolvers(isAdmin, async () => {
     try {
-      const employees = await Admin.find(employees);
-
+      const employees = await Employee.find();
       if (!employees) {
         throw new ApolloError("No Employee found in the database");
-      } else {
-        return {
-          employees
-        };
       }
+      return employees;
     } catch (err) {
       throw err;
     }

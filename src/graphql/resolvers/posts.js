@@ -5,7 +5,12 @@ import { combineResolvers } from "graphql-resolvers";
 import Employee from "../../models/user-type/employee";
 import Post from "../../models/posts";
 import Comment from "../../models/comments";
-import { isEmployee } from "../../services/authorization";
+import { isEmployee, isAuthenticated } from "../../services/authorization";
+import { pubsub } from "../../config/pubsub";
+
+// Subscription Variables
+const POST_UPDATES = "post_updates";
+const COMMENT_UPDATES = "comment_updates";
 
 dotenv.config();
 
@@ -17,7 +22,6 @@ export default {
       try {
         // User should finish updating their profile
         const employCheck = await Employee.findById(Id);
-        console.log(employCheck);
 
         if (!employCheck) {
           throw new ApolloError("Employee not found");
@@ -31,8 +35,6 @@ export default {
           creator: Id
         });
 
-        console.log(newPosts);
-
         // Save post to database
         const savedPost = await newPosts.save();
 
@@ -43,6 +45,11 @@ export default {
           { new: true }
         );
 
+        // Post Subscription (push live updates)
+        pubsub.publish(POST_UPDATES, {
+          [POST_UPDATES]: savedPost
+        });
+
         // Response
         return savedPost;
       } catch (err) {
@@ -52,10 +59,20 @@ export default {
   ),
 
   // Edit a post
-  edit_post: combineResolvers(isEmployee, async (_, args, { Id }) => {
+  update_post: combineResolvers(isEmployee, async (_, args, { Id }) => {
     try {
       const updatedPost = await Employee.findByIdAndUpdate(Id, args, {
         new: true
+      });
+
+      // If no post was found
+      if (!updatedPost) {
+        throw new ApolloError("Post was not found");
+      }
+
+      // Update Posts (Subscription)
+      pubsub.publish(POST_UPDATES, {
+        [POST_UPDATES]: updatedPost
       });
 
       // Response
@@ -64,6 +81,71 @@ export default {
       throw err;
     }
   }),
+
+  // View all posts
+  view_posts: combineResolvers(isAuthenticated, async () => {
+    try {
+      const posts = await Post.find();
+
+      if (!posts) {
+        throw new ApolloError("No Post found in the database");
+      }
+      return posts;
+    } catch (err) {
+      throw err;
+    }
+  }),
+
+  // Resolver to view a single post
+  post_with_id: combineResolvers(isAuthenticated, async (_, { postId }) => {
+    try {
+      // Check for post
+      const checkPost = await Post.findById(postId);
+
+      if (!checkPost) {
+        throw new ApolloError("Post does not exists");
+      }
+
+      return checkPost;
+    } catch (err) {
+      throw err;
+    }
+  }),
+
+  // View personal posts
+  view_own_posts: combineResolvers(isEmployee, async (_, __, { Id }) => {
+    try {
+      const posts = await Post.find({
+        creator: Id
+      });
+
+      if (!posts) {
+        throw new ApolloError("No Post found in the database");
+      }
+      return posts;
+    } catch (err) {
+      throw err;
+    }
+  }),
+
+  // View post by catergory
+  view_post_by_category: combineResolvers(
+    isEmployee,
+    async (_, { category }) => {
+      try {
+        const posts = await Post.find({
+          category
+        });
+
+        if (!posts) {
+          throw new ApolloError("No Post found in this category");
+        }
+        return posts;
+      } catch (err) {
+        throw err;
+      }
+    }
+  ),
 
   // Delete a post
   delete_post: combineResolvers(isEmployee, async (_, { postId }, { Id }) => {
@@ -86,6 +168,11 @@ export default {
         { $pull: { posts: deletedPost._id } },
         { new: true }
       );
+
+      // Update Posts (Subscription)
+      pubsub.publish(POST_UPDATES, {
+        [POST_UPDATES]: deletedPost
+      });
 
       // Response
       return {
@@ -124,11 +211,32 @@ export default {
           { new: true }
         );
 
+        // Update comments
+        pubsub.publish(COMMENT_UPDATES, {
+          [COMMENT_UPDATES]: savedComment
+        });
+
         // Response
         return savedComment;
       } catch (err) {
         throw err;
       }
     }
-  )
+  ),
+
+  /*********************************************************************
+   * Subscriptions
+   ********************************************************************/
+
+  // To return a new new post
+  post_updates: {
+    subscribe: () => {
+      return pubsub.asyncIterator([POST_UPDATES]);
+    }
+  },
+  comment_updates: {
+    subscribe: () => {
+      return pubsub.asyncIterator([COMMENT_UPDATES]);
+    }
+  }
 };

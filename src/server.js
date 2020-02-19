@@ -44,7 +44,11 @@ schema.applyMiddleware({ app, path: constants.GRAPHQL_PATH });
 
 // Wrap the Express server, Server setup for websockets to use graphql subscriptions
 const graphQLServer = http.createServer(app);
+schema.installSubscriptionHandlers(graphQLServer);
 
 graphQLServer.listen(port, () => {
   console.log(`Server is Listening on Port ${port}`);
+  console.log(
+    `🚀 Subscriptions ready at ws://localhost:${port}${schema.subscriptionsPath}`
+  );
 });
