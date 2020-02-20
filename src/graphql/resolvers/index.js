@@ -19,7 +19,9 @@ export default {
   },
   Post: {
     creator: (_, __) => Employee.findById(_.creator),
-    comments: (_, __) => Comment.find({ _id: _.comments })
+    comments: (_, __) => Comment.find({ _id: _.comments }),
+    likes: (_, __) => Employee.find({ _id: _.likes }),
+    dis_likes: (_, __) => Employee.find({ _id: _.dis_likes })
   },
   Comment: {
     creator: (_, __) => Employee.findById(_.creator)
@@ -42,10 +44,13 @@ export default {
     create_post: postResolver.create_post,
     update_post: postResolver.update_post,
     delete_post: postResolver.delete_post,
-    post_comment: postResolver.post_comment
+    post_comment: postResolver.post_comment,
+    like_post: postResolver.like_post,
+    dislike_post: postResolver.dislike_post
   },
   Subscription: {
     post_updates: postResolver.post_updates,
     comment_updates: postResolver.comment_updates
+    // like_updates: postResolver.like_updates
   }
 };

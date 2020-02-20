@@ -8,10 +8,11 @@ mongoose.Promise = global.Promise; // To Use Promises With Mongoose
 
 try {
   // Connect to DB
+  // { useNewUrlParser: true, useUnifiedTopology: true }: To remove depreciation Warnings
   mongoose.connect(process.env.DB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
-  }); // { useNewUrlParser: true, useUnifiedTopology: true }: To remove depreciation Warnings
+  });
 } catch (err) {
   throw err;
 }

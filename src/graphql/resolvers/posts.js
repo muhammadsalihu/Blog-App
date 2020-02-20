@@ -11,6 +11,7 @@ import { pubsub } from "../../config/pubsub";
 // Subscription Variables
 const POST_UPDATES = "post_updates";
 const COMMENT_UPDATES = "comment_updates";
+// const LIKE_UPDATES = "like_updates";
 
 dotenv.config();
 
@@ -169,11 +170,6 @@ export default {
         { new: true }
       );
 
-      // Update Posts (Subscription)
-      pubsub.publish(POST_UPDATES, {
-        [POST_UPDATES]: deletedPost
-      });
-
       // Response
       return {
         message: "Post was deleted successfully",
@@ -224,6 +220,62 @@ export default {
     }
   ),
 
+  // Like Post
+  like_post: combineResolvers(isEmployee, async (_, { postId }, { Id }) => {
+    try {
+      // const singlePost = await Post.findById(postId);
+
+      // const findUser = await singlePost.dis_likes.console.log(findUser);
+
+      // // Unlike a post if a user has aleready liked a post
+      // if (findUser) {
+      //   await Post.findByIdAndUpdate(
+      //     postId,
+      //     { $pull: { likes: Id }, $inc: { likes_count: -1 } },
+      //     { new: true }
+      //   );
+
+      //   return {
+      //     message: "Post Unliked",
+      //     value: true
+      //   };
+      // }
+
+      await Post.findByIdAndUpdate(
+        postId,
+        { $push: { likes: Id }, $inc: { likes_count: +1 } },
+        { new: true }
+      );
+
+      return {
+        message: "Post liked",
+        value: true
+      };
+    } catch (err) {
+      throw err;
+    }
+  }),
+
+  //Dislike Post
+  dislike_post: combineResolvers(isEmployee, async (_, { postId }, { Id }) => {
+    try {
+      // const singlePost = await Post.findById(postId);
+
+      await Post.findByIdAndUpdate(
+        postId,
+        { $push: { dis_likes: Id }, $inc: { dislikes_count: +1 } },
+        { new: true }
+      );
+
+      return {
+        message: "Post disliked",
+        value: true
+      };
+    } catch (err) {
+      throw err;
+    }
+  }),
+
   /*********************************************************************
    * Subscriptions
    ********************************************************************/
@@ -239,4 +291,9 @@ export default {
       return pubsub.asyncIterator([COMMENT_UPDATES]);
     }
   }
+  // like_updates: {
+  //   subscribe: () => {
+  //     return pubsub.asyncIterator([LIKE_UPDATES]);
+  //   }
+  // }
 };

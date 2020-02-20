@@ -35,6 +35,8 @@ export default gql`
     update_post(post_id: ID!, title: String, content: String): Post
     delete_post(postId: ID!): Status
     post_comment(postId: ID!, comment: String!): Comment!
+    like_post(postId: ID!): Status
+    dislike_post(postId: ID!): Status
   }
 
   type Subscription {
@@ -74,7 +76,13 @@ export default gql`
     content: String!
     category: String!
     creator: Employee!
+    like_state: Boolean
+    dislike_state: Boolean
+    likes_count: Int
+    dislikes_count: Int
     comments: [Comment!]
+    likes: [Employee]
+    dis_likes: [Employee]
   }
 
   type Comment {
