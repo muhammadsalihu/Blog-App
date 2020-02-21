@@ -35,13 +35,14 @@ export default gql`
     update_post(post_id: ID!, title: String, content: String): Post
     delete_post(postId: ID!): Status
     post_comment(postId: ID!, comment: String!): Comment!
-    like_post(postId: ID!): Status
-    dislike_post(postId: ID!): Status
+    like_post(postId: ID!, btn_state: Boolean): Status
+    dislike_post(postId: ID!, btn_state): Status
   }
 
   type Subscription {
     post_updates: Post
     comment_updates: Comment
+    like_updates: Post
   }
 
   type Status {

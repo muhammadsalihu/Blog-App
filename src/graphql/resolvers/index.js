@@ -50,7 +50,7 @@ export default {
   },
   Subscription: {
     post_updates: postResolver.post_updates,
-    comment_updates: postResolver.comment_updates
-    // like_updates: postResolver.like_updates
+    comment_updates: postResolver.comment_updates,
+    like_updates: postResolver.like_updates
   }
 };

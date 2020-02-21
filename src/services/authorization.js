@@ -22,12 +22,3 @@ export const isEmployee = combineResolvers(
       ? skip
       : new AuthenticationError("Not Authorized as an Employee")
 );
-
-// export const isAny = (_, __, { admin, employee }) => {
-//   if (admin === true || employee === true) {
-//     skip;
-//     console.log("somethinsfg");
-//   } else {
-//     new AuthenticationError("Not Authorized as something");
-//   }
-// };

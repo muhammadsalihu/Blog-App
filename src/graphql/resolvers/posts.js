@@ -11,7 +11,7 @@ import { pubsub } from "../../config/pubsub";
 // Subscription Variables
 const POST_UPDATES = "post_updates";
 const COMMENT_UPDATES = "comment_updates";
-// const LIKE_UPDATES = "like_updates";
+const LIKE_UPDATES = "like_updates";
 
 dotenv.config();
 
@@ -221,60 +221,84 @@ export default {
   ),
 
   // Like Post
-  like_post: combineResolvers(isEmployee, async (_, { postId }, { Id }) => {
-    try {
-      // const singlePost = await Post.findById(postId);
+  like_post: combineResolvers(
+    isEmployee,
+    async (_, { postId, btn_state }, { Id }) => {
+      try {
+        // Unlike a post if a user has aleready liked a post
+        if (!btn_state) {
+          const updatedLikes = await Post.findByIdAndUpdate(
+            postId,
+            { $pull: { likes: Id }, $inc: { likes_count: -1 } },
+            { new: true }
+          );
 
-      // const findUser = await singlePost.dis_likes.console.log(findUser);
+          // Update Likes
+          pubsub.publish(LIKE_UPDATES, {
+            [LIKE_UPDATES]: updatedLikes
+          });
 
-      // // Unlike a post if a user has aleready liked a post
-      // if (findUser) {
-      //   await Post.findByIdAndUpdate(
-      //     postId,
-      //     { $pull: { likes: Id }, $inc: { likes_count: -1 } },
-      //     { new: true }
-      //   );
+          return {
+            message: "Like button disabled",
+            value: false
+          };
+        }
 
-      //   return {
-      //     message: "Post Unliked",
-      //     value: true
-      //   };
-      // }
+        const updatedLikes = await Post.findByIdAndUpdate(
+          postId,
+          { $push: { likes: Id }, $inc: { likes_count: +1 } },
+          { new: true }
+        );
 
-      await Post.findByIdAndUpdate(
-        postId,
-        { $push: { likes: Id }, $inc: { likes_count: +1 } },
-        { new: true }
-      );
+        // Update Likes
+        pubsub.publish(LIKE_UPDATES, {
+          [LIKE_UPDATES]: updatedLikes
+        });
 
-      return {
-        message: "Post liked",
-        value: true
-      };
-    } catch (err) {
-      throw err;
+        return {
+          message: "Post liked",
+          value: true
+        };
+      } catch (err) {
+        throw err;
+      }
     }
-  }),
+  ),
 
   //Dislike Post
-  dislike_post: combineResolvers(isEmployee, async (_, { postId }, { Id }) => {
-    try {
-      // const singlePost = await Post.findById(postId);
+  dislike_post: combineResolvers(
+    isEmployee,
+    async (_, { postId, btn_state }, { Id }) => {
+      try {
+        // Unlike a post if a user has aleready liked a post
+        if (!btn_state) {
+          await Post.findByIdAndUpdate(
+            postId,
+            { $pull: { dis_likes: Id }, $inc: { dislikes_count: -1 } },
+            { new: true }
+          );
 
-      await Post.findByIdAndUpdate(
-        postId,
-        { $push: { dis_likes: Id }, $inc: { dislikes_count: +1 } },
-        { new: true }
-      );
+          return {
+            message: "Dislike button disabled",
+            value: false
+          };
+        }
 
-      return {
-        message: "Post disliked",
-        value: true
-      };
-    } catch (err) {
-      throw err;
+        await Post.findByIdAndUpdate(
+          postId,
+          { $push: { dis_likes: Id }, $inc: { dislikes_count: +1 } },
+          { new: true }
+        );
+
+        return {
+          message: "Post Disliked",
+          value: true
+        };
+      } catch (err) {
+        throw err;
+      }
     }
-  }),
+  ),
 
   /*********************************************************************
    * Subscriptions
@@ -290,10 +314,10 @@ export default {
     subscribe: () => {
       return pubsub.asyncIterator([COMMENT_UPDATES]);
     }
+  },
+  like_updates: {
+    subscribe: () => {
+      return pubsub.asyncIterator([LIKE_UPDATES]);
+    }
   }
-  // like_updates: {
-  //   subscribe: () => {
-  //     return pubsub.asyncIterator([LIKE_UPDATES]);
-  //   }
-  // }
 };

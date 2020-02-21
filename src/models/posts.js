@@ -35,10 +35,6 @@ const postSchema = new Schema(
         ref: "Employee"
       }
     ],
-    like_state: {
-      type: Boolean,
-      default: false
-    },
     likes_count: {
       type: Number,
       default: 0
@@ -46,10 +42,6 @@ const postSchema = new Schema(
     dislikes_count: {
       type: Number,
       default: 0
-    },
-    dislike_state: {
-      type: Boolean,
-      default: false
     }
   },
   { timestamps: true }
