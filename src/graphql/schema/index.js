@@ -36,7 +36,7 @@ export default gql`
     delete_post(postId: ID!): Status
     post_comment(postId: ID!, comment: String!): Comment!
     like_post(postId: ID!, btn_state: Boolean): Status
-    dislike_post(postId: ID!, btn_state): Status
+    dislike_post(postId: ID!, btn_state: Boolean!): Status
   }
 
   type Subscription {
