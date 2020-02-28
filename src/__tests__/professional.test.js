@@ -1,22 +1,18 @@
-const mongoose = require("mongoose");
-const UserModel = require("../../src/models/user");
-const adminData = {
-  email: "john@harden.com",
-  password: "password",
-  full_name: "Harden john"
-};
-const dbUrl = process.env.DB_UR;
-describe("User Model Test", () => {
-  // Connect to Mongo memory server
-  // By using mongoose.connect
+const { MongoClient } = require("mongodb");
+import Admin from "../models/user-type/admin";
+
+describe("Insert", () => {
   let connection;
   let db;
 
+  console.log(global.__MONGO_URI__);
+  console.log(global.__MONGO_DB_NAME__);
+
   beforeAll(async () => {
-    connection = await mongoose.connect(process.env.DB_UR, {
+    connection = await MongoClient.connect(global.__MONGO_URI__, {
       useNewUrlParser: true
     });
-    db = await connection.db(process.env.DB_UR);
+    db = await connection.db(global.__MONGO_DB_NAME__);
   });
 
   afterAll(async () => {
@@ -24,28 +20,10 @@ describe("User Model Test", () => {
     await db.close();
   });
 
-  it("create & save user successfully", async () => {
-    const validUser = new UserModel(adminData);
-    const savedUser = await validUser.save();
-    // Object Id should be defined when successfully saved to MongoDB.
-    expect(savedUser._id).toBeDefined();
-    expect(savedUser.full_name).toBe(adminData.full_name);
-    expect(savedUser.email).toBe(adminData.email);
-    expect(savedUser.password).toBe(adminData.password);
-  });
+  it("should insert a doc into collection", async () => {});
 });
 
-// Create User without required field
-it("create user without required field should failed", async () => {
-  const userWithoutRequiredField = new UserModel({ full_name: "Shark" });
-  let err;
-  try {
-    const savedUserWithoutRequiredField = await userWithoutRequiredField.save();
-    error = savedUserWithoutRequiredField;
-  } catch (error) {
-    err = error;
-  }
-  expect(err).toBeInstanceOf(mongoose.Error.ValidationError);
-  expect(err.errors.email).toBeDefined();
-  expect(err.errors.password).toBeDefined();
-});
+test("Test mutations", () => {});
+
+// global.__MONGO_DB_NAME__ = "jest"
+// global.__MONGO_DB_NAME__ = "mongodb://127.0.0.1:60832/jest?"

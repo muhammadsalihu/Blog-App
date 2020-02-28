@@ -13,7 +13,7 @@ export default gql`
     admin_login(email: String!, password: String!): Status
     employee_login(employee_id: String!, password: String!): Status
     view_employees: [Employee]
-    view_posts: [Post]
+    view_posts(first: Int, skip: Int): [Post]
     post_with_id(postId: ID!): Post!
     view_own_posts: [Post]
     view_post_by_category(category: String): [Post]
